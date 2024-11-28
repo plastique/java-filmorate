@@ -14,7 +14,7 @@ import java.util.Map;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private static Long increment = 1L;
+    private static Long id = 1L;
     private final Map<Long, User> users = new HashMap<>();
 
     @GetMapping
@@ -96,6 +96,6 @@ public class UserController {
     }
 
     private Long getNextId() {
-        return increment++;
+        return id++;
     }
 }

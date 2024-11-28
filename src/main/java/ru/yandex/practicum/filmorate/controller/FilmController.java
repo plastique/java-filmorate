@@ -15,7 +15,8 @@ import java.util.Map;
 @Slf4j
 public class FilmController {
     private static final int DESCRIPTION_LIMIT = 200;
-    private static Long increment = 1L;
+    private static final LocalDate RELEASE_MIN_DATE = LocalDate.of(1895, 12, 28);
+    private static Long id = 1L;
     private final Map<Long, Film> films = new HashMap<>();
 
     @GetMapping
@@ -79,7 +80,7 @@ public class FilmController {
             throw new ValidationException("Film description is too long");
         }
 
-        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(RELEASE_MIN_DATE)) {
             throw new ValidationException("Film description is too long");
         }
 
@@ -89,6 +90,6 @@ public class FilmController {
     }
 
     private Long getNextId() {
-        return increment++;
+        return id++;
     }
 }
