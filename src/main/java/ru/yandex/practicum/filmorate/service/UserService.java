@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.contracts.UserRepository;
@@ -24,24 +23,40 @@ public class UserService {
     }
 
     public User create(final User user) {
-        validate(user);
+        validateUserData(user);
         setNameIfEmpty(user);
 
         return userRepository.create(user);
     }
 
     public User update(final User user) {
-        validate(user);
+        validateUserData(user);
         setNameIfEmpty(user);
 
-        try {
-            return userRepository.update(user);
-        } catch (IllegalArgumentException e) {
-            throw new NotFoundException(e.getMessage());
-        }
+        return userRepository.update(user);
     }
 
-    private void validate(final User user) {
+    public Collection<User> getUserFriends(final Long userId) {
+        return userRepository.findFriendsByUserId(userId);
+    }
+
+    public Collection<User> getCommonFriends(final Long id, final Long otherId) {
+        return userRepository.findCommonFriends(id, otherId);
+    }
+
+    public void addFriend(final Long userId, final Long friendId) {
+        validateUserFriend(userId, friendId);
+
+        userRepository.addFriend(userId, friendId);
+    }
+
+    public void deleteFriend(final Long userId, final Long friendId) {
+        validateUserFriend(userId, friendId);
+
+        userRepository.deleteFriend(userId, friendId);
+    }
+
+    private void validateUserData(final User user) {
         if (user == null) {
             throw new ValidationException("User is null");
         }
@@ -56,6 +71,16 @@ public class UserService {
 
         if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Birthday is not valid");
+        }
+    }
+
+    private void validateUserFriend(final Long userId, final Long friendId) {
+        if (userId == null || friendId == null) {
+            throw new ValidationException("userId and friendId can't be null");
+        }
+
+        if (userId.equals(friendId)) {
+            throw new ValidationException("User and friend can't be the same");
         }
     }
 
