@@ -12,4 +12,10 @@ public interface FilmRepository {
     Film create(Film film);
 
     Film update(Film film);
+
+    void addLike(Long id, Long userId);
+
+    void deleteLike(Long id, Long userId);
+
+    Collection<Film> getPopular(int count);
 }

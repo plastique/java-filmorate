@@ -25,7 +25,6 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public User create(final User user) {
-
         User newUser = User.builder()
                 .id(getNextId())
                 .email(user.getEmail())
@@ -36,12 +35,11 @@ public class InMemoryUserRepository implements UserRepository {
 
         users.put(newUser.getId(), newUser);
 
-        return user;
+        return newUser;
     }
 
     @Override
     public User update(final User user) {
-
         User updatedUser = findById(user.getId());
 
         updatedUser.setEmail(user.getEmail());
@@ -56,22 +54,26 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public void addFriend(final Long userId, final Long friendId) {
-        userExistsOrException(friendId);
-
         User user = findById(userId);
-        user.getFriends().add(friendId);
+        User friend = findById(friendId);
 
-        users.put(userId, user);
+        user.getFriends().add(friendId);
+        friend.getFriends().add(userId);
+
+        users.put(user.getId(), user);
+        users.put(friend.getId(), friend);
     }
 
     @Override
     public void deleteFriend(final Long userId, final Long friendId) {
-        userExistsOrException(friendId);
-
         User user = findById(userId);
-        user.getFriends().remove(friendId);
+        User friend = findById(friendId);
 
-        users.put(userId, user);
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(userId);
+
+        users.put(user.getId(), user);
+        users.put(friend.getId(), friend);
     }
 
     @Override
@@ -83,7 +85,10 @@ public class InMemoryUserRepository implements UserRepository {
             return friendsList;
         }
 
-        friends.stream().peek((Long id) -> friendsList.add(findById(id)));
+        friends.forEach((Long id) -> {
+            User friend = findById(id);
+            friendsList.add(friend);
+        });
 
         return friendsList;
     }
@@ -100,14 +105,19 @@ public class InMemoryUserRepository implements UserRepository {
         }
 
         userFriends.stream()
-                .filter(userFriends::contains)
-                .peek((Long id) -> friendsList.add(findById(id)));
+                .filter(otherUserFriends::contains)
+                .forEach((Long id) -> friendsList.add(findById(id)));
 
         return friendsList;
     }
 
-    private void userExistsOrException(final Long Id) {
-        if (!users.containsKey(Id)) {
+    @Override
+    public boolean exists(final Long id) {
+        return users.containsKey(id);
+    }
+
+    private void userExistsOrException(final Long id) {
+        if (!exists(id)) {
             throw new NotFoundException("User not found");
         }
     }

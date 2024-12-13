@@ -35,6 +35,28 @@ public class FilmService {
         return filmRepository.update(film);
     }
 
+    public void addLike(final Long id, final Long userId) {
+        validateFilmId(id);
+        validateUserId(userId);
+
+        filmRepository.addLike(id, userId);
+    }
+
+    public void deleteLike(final Long id, final Long userId) {
+        validateFilmId(id);
+        validateUserId(userId);
+
+        filmRepository.deleteLike(id, userId);
+    }
+
+    public Collection<Film> getPopular(final int count) {
+        if (count <= 0) {
+            throw new ValidationException("Count must be greater than 0");
+        }
+
+        return filmRepository.getPopular(count);
+    }
+
     private void validate(final Film film) {
         if (film == null) {
             throw new ValidationException("Film is null");
@@ -49,11 +71,23 @@ public class FilmService {
         }
 
         if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(RELEASE_MIN_DATE)) {
-            throw new ValidationException("Film description is too long");
+            throw new ValidationException("Film release date is null or incorrect");
         }
 
         if (film.getDuration() < 0) {
             throw new ValidationException("Film duration is negative");
+        }
+    }
+
+    private void validateFilmId(final Long id) {
+        if (id == null) {
+            throw new ValidationException("Film id is null");
+        }
+    }
+
+    private void validateUserId(final Long id) {
+        if (id == null) {
+            throw new ValidationException("User id is null");
         }
     }
 }

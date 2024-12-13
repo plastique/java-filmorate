@@ -4,13 +4,20 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.contracts.FilmRepository;
+import ru.yandex.practicum.filmorate.repository.contracts.UserRepository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmRepository implements FilmRepository {
     private static Long id = 1L;
     private final Map<Long, Film> films = new HashMap<>();
+    private final UserRepository userRepository;
+
+    public InMemoryFilmRepository(final UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     public Collection<Film> getAll() {
         return films.values();
@@ -24,7 +31,6 @@ public class InMemoryFilmRepository implements FilmRepository {
 
     @Override
     public Film create(final Film film) {
-
         Film newFilm = Film.builder()
                 .id(getNextId())
                 .name(film.getName())
@@ -33,19 +39,14 @@ public class InMemoryFilmRepository implements FilmRepository {
                 .duration(film.getDuration())
                 .build();
 
-        films.put(film.getId(), newFilm);
+        films.put(newFilm.getId(), newFilm);
 
         return newFilm;
     }
 
     @Override
     public Film update(final Film film) {
-
-        if (!films.containsKey(film.getId())) {
-            throw new NotFoundException("Film not found");
-        }
-
-        Film updatedFilm = films.get(film.getId());
+        Film updatedFilm = findById(film.getId());
 
         updatedFilm.setName(film.getName());
         updatedFilm.setDescription(film.getDescription());
@@ -55,6 +56,39 @@ public class InMemoryFilmRepository implements FilmRepository {
         films.put(updatedFilm.getId(), updatedFilm);
 
         return updatedFilm;
+    }
+
+    @Override
+    public void addLike(final Long id, final Long userId) {
+        Film film = findById(id);
+
+        if (!userRepository.exists(userId)) {
+            throw new NotFoundException("User not found");
+        }
+
+        film.getLikes().add(userId);
+        films.put(id, film);
+    }
+
+    @Override
+    public void deleteLike(final Long id, final Long userId) {
+        Film film = findById(id);
+
+        if (!userRepository.exists(userId)) {
+            throw new NotFoundException("User not found");
+        }
+
+        film.getLikes().remove(userId);
+        films.put(id, film);
+    }
+
+    @Override
+    public Collection<Film> getPopular(int count) {
+        return films.values()
+                .stream()
+                .sorted((Film a, Film b) -> b.getLikes().size() - a.getLikes().size())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     private Long getNextId() {

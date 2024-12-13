@@ -33,7 +33,6 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    @ResponseStatus(HttpStatus.CREATED)
     public void addFriend(
             @PathVariable final Long id,
             @PathVariable final Long friendId

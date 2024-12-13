@@ -13,7 +13,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 public class ErrorHandler {
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidation(final ValidationException e) {
         log.error(e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
