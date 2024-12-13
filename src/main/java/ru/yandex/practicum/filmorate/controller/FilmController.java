@@ -13,7 +13,7 @@ public class FilmController {
     private final FilmService filmService;
 
     @Autowired
-    FilmController(final FilmService filmService) {
+    public FilmController(final FilmService filmService) {
         this.filmService = filmService;
     }
 
