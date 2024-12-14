@@ -13,8 +13,8 @@ public class InMemoryUserRepository implements UserRepository {
     private final Map<Long, User> users = new HashMap<>();
 
     @Override
-    public Collection<User> getAll() {
-        return users.values();
+    public List<User> getAll() {
+        return users.values().stream().toList();
     }
 
     public User findById(final Long id) {
@@ -77,7 +77,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public Collection<User> findFriendsByUserId(final Long userId) {
+    public List<User> findFriendsByUserId(final Long userId) {
         Set<Long> friends = findById(userId).getFriends();
         List<User> friendsList = new ArrayList<>();
 
@@ -94,7 +94,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public Collection<User> findCommonFriends(Long userId, Long otherUserId) {
+    public List<User> findCommonFriends(Long userId, Long otherUserId) {
         Set<Long> userFriends = findById(userId).getFriends();
         Set<Long> otherUserFriends = findById(otherUserId).getFriends();
 
@@ -112,12 +112,12 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public boolean exists(final Long id) {
+    public boolean isExists(final Long id) {
         return users.containsKey(id);
     }
 
-    private void userExistsOrException(final Long id) {
-        if (!exists(id)) {
+    private void validateUser(final Long id) {
+        if (!isExists(id)) {
             throw new NotFoundException("User not found");
         }
     }

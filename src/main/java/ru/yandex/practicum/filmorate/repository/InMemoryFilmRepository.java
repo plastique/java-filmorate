@@ -1,26 +1,27 @@
 package ru.yandex.practicum.filmorate.repository;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.contracts.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.contracts.UserRepository;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class InMemoryFilmRepository implements FilmRepository {
     private static Long id = 1L;
     private final Map<Long, Film> films = new HashMap<>();
     private final UserRepository userRepository;
 
-    public InMemoryFilmRepository(final UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    public Collection<Film> getAll() {
-        return films.values();
+    public List<Film> getAll() {
+        return films.values().stream().toList();
     }
 
     public Film findById(final Long id) {
@@ -62,7 +63,7 @@ public class InMemoryFilmRepository implements FilmRepository {
     public void addLike(final Long id, final Long userId) {
         Film film = findById(id);
 
-        if (!userRepository.exists(userId)) {
+        if (!userRepository.isExists(userId)) {
             throw new NotFoundException("User not found");
         }
 
@@ -74,7 +75,7 @@ public class InMemoryFilmRepository implements FilmRepository {
     public void deleteLike(final Long id, final Long userId) {
         Film film = findById(id);
 
-        if (!userRepository.exists(userId)) {
+        if (!userRepository.isExists(userId)) {
             throw new NotFoundException("User not found");
         }
 
@@ -83,7 +84,7 @@ public class InMemoryFilmRepository implements FilmRepository {
     }
 
     @Override
-    public Collection<Film> getPopular(int count) {
+    public List<Film> getPopular(int count) {
         return films.values()
                 .stream()
                 .sorted((Film a, Film b) -> b.getLikes().size() - a.getLikes().size())

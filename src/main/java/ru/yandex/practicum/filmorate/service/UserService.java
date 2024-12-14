@@ -1,24 +1,20 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.contracts.UserRepository;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
 
-    @Autowired
-    public UserService(final UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    public Collection<User> getList() {
+    public List<User> getList() {
         return userRepository.getAll();
     }
 
@@ -36,11 +32,11 @@ public class UserService {
         return userRepository.update(user);
     }
 
-    public Collection<User> getUserFriends(final Long userId) {
+    public List<User> getUserFriends(final Long userId) {
         return userRepository.findFriendsByUserId(userId);
     }
 
-    public Collection<User> getCommonFriends(final Long id, final Long otherId) {
+    public List<User> getCommonFriends(final Long id, final Long otherId) {
         return userRepository.findCommonFriends(id, otherId);
     }
 

@@ -2,10 +2,10 @@ package ru.yandex.practicum.filmorate.repository.contracts;
 
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface UserRepository {
-    Collection<User> getAll();
+    List<User> getAll();
 
     User findById(Long id);
 
@@ -17,9 +17,9 @@ public interface UserRepository {
 
     void deleteFriend(Long userId, Long friendId);
 
-    Collection<User> findFriendsByUserId(Long userId);
+    List<User> findFriendsByUserId(Long userId);
 
-    Collection<User> findCommonFriends(Long userId, Long otherUserId);
+    List<User> findCommonFriends(Long userId, Long otherUserId);
 
-    boolean exists(Long id);
+    boolean isExists(Long id);
 }

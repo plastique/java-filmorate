@@ -1,27 +1,23 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.contracts.FilmRepository;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class FilmService {
     private static final int DESCRIPTION_LIMIT = 200;
     private static final LocalDate RELEASE_MIN_DATE = LocalDate.of(1895, 12, 28);
 
     private final FilmRepository filmRepository;
 
-    @Autowired
-    public FilmService(final FilmRepository filmRepository) {
-        this.filmRepository = filmRepository;
-    }
-
-    public Collection<Film> getList() {
+    public List<Film> getList() {
         return filmRepository.getAll();
     }
 
@@ -49,7 +45,7 @@ public class FilmService {
         filmRepository.deleteLike(id, userId);
     }
 
-    public Collection<Film> getPopular(final int count) {
+    public List<Film> getPopular(final int count) {
         if (count <= 0) {
             throw new ValidationException("Count must be greater than 0");
         }

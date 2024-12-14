@@ -2,10 +2,10 @@ package ru.yandex.practicum.filmorate.repository.contracts;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface FilmRepository {
-    Collection<Film> getAll();
+    List<Film> getAll();
 
     Film findById(Long id);
 
@@ -17,5 +17,5 @@ public interface FilmRepository {
 
     void deleteLike(Long id, Long userId);
 
-    Collection<Film> getPopular(int count);
+    List<Film> getPopular(int count);
 }
