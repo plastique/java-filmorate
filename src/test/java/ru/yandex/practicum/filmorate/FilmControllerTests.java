@@ -5,6 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.repository.InMemoryFilmRepository;
+import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
+import ru.yandex.practicum.filmorate.repository.contracts.UserRepository;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
 import java.util.Random;
@@ -15,11 +19,19 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FilmControllerTests {
     private static final int DESCRIPTION_LIMIT = 200;
     private static final LocalDate RELEASE_MIN_DATE = LocalDate.of(1895, 12, 28);
+
     private ru.yandex.practicum.filmorate.controller.FilmController controller;
+    private ru.yandex.practicum.filmorate.controller.UserController userController;
 
     @BeforeEach
     public void setUp() {
-        controller = new ru.yandex.practicum.filmorate.controller.FilmController();
+        UserRepository userRepository = new InMemoryUserRepository();
+
+        controller = new ru.yandex.practicum.filmorate.controller.FilmController(
+                new FilmService(new InMemoryFilmRepository(userRepository))
+        );
+
+
     }
 
     private static Film makeFilm() {
@@ -48,10 +60,10 @@ public class FilmControllerTests {
 
     @Test
     public void filmAddedWithValidFieldValues() {
-        Film film = makeFilm();
+        final Film[] films = {null};
 
-        assertDoesNotThrow(() -> controller.create(film), "Film not created");
-        assertTrue(controller.list().contains(film), "Film not added");
+        assertDoesNotThrow(() -> films[0] = controller.create(makeFilm()), "Film not created");
+        assertTrue(controller.list().contains(films[0]), "Film not added");
     }
 
     @Test

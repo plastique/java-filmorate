@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 
@@ -16,7 +18,9 @@ public class UserControllerTests {
 
     @BeforeEach
     public void setUp() {
-        controller = new ru.yandex.practicum.filmorate.controller.UserController();
+        controller = new ru.yandex.practicum.filmorate.controller.UserController(
+                new UserService(new InMemoryUserRepository())
+        );
     }
 
     private static User makeUser() {
@@ -30,10 +34,10 @@ public class UserControllerTests {
 
     @Test
     public void userAddedWithValidFieldValues() {
-        User user = makeUser();
+        final User[] users = {null};
 
-        assertDoesNotThrow(() -> controller.create(user), "User not created");
-        assertTrue(controller.list().contains(user), "User not added");
+        assertDoesNotThrow(() -> users[0] = controller.create(makeUser()), "User not created");
+        assertTrue(controller.list().contains(users[0]), "User not added");
     }
 
     @Test
