@@ -1,0 +1,45 @@
+package ru.yandex.practicum.filmorate.repository;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.repository.contracts.MpaRepository;
+import ru.yandex.practicum.filmorate.repository.mappers.MpaRowMapper;
+
+import java.util.List;
+
+@Repository
+@RequiredArgsConstructor
+@Primary
+public class MpaDbRepository implements MpaRepository {
+    public static final String TABLE_NAME = "mpas";
+
+    private final JdbcTemplate jdbc;
+    private final MpaRowMapper mapper = new MpaRowMapper();
+
+    @Override
+    public List<Mpa> getAll() {
+        return jdbc.query(
+                "SELECT * FROM ? ORDER BY title",
+                mapper,
+                TABLE_NAME
+        );
+    }
+
+    @Override
+    public Mpa findById(final Long id) {
+        try {
+            return jdbc.queryForObject(
+                    "SELECT * FROM ? WHERE id = ?",
+                    mapper,
+                    TABLE_NAME,
+                    id
+            );
+        } catch (RuntimeException e) {
+            throw new NotFoundException("Mpa not found");
+        }
+    }
+}

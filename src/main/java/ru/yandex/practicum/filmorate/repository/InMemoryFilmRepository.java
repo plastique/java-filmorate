@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.contracts.FilmRepository;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
+@Repository
 @RequiredArgsConstructor
 public class InMemoryFilmRepository implements FilmRepository {
     private static Long id = 1L;
