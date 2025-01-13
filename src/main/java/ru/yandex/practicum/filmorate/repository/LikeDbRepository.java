@@ -32,8 +32,7 @@ public class LikeDbRepository implements LikeRepository {
 
         try {
             jdbc.update(
-                    "INSERT INTO ? (film_id, user_id) VALUES (?, ?)",
-                    TABLE_NAME,
+                    "INSERT INTO " + TABLE_NAME + " (film_id, user_id) VALUES (?, ?)",
                     filmId,
                     userId
             );
@@ -54,8 +53,7 @@ public class LikeDbRepository implements LikeRepository {
 
         try {
             jdbc.update(
-                    "DELETE FROM ? WHERE film_id = ? AND user_id = ?",
-                    TABLE_NAME,
+                    "DELETE FROM " + TABLE_NAME + " WHERE film_id = ? AND user_id = ?",
                     filmId,
                     userId
             );

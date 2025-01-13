@@ -34,8 +34,7 @@ public class FriendshipDbRepository implements FriendshipRepository {
 
         try {
             jdbc.update(
-                    "INSERT INTO ? (user_id, friend_id, active) VALUES (?, ?, ?)",
-                    TABLE_NAME,
+                    "INSERT INTO " + TABLE_NAME + " (user_id, friend_id, active) VALUES (?, ?, ?)",
                     userId,
                     friendId,
                     false
@@ -57,8 +56,7 @@ public class FriendshipDbRepository implements FriendshipRepository {
 
         try {
             jdbc.update(
-                    "DELETE FROM ? WHERE user_id = ? AND friend_id = ?",
-                    TABLE_NAME,
+                    "DELETE FROM " + TABLE_NAME + " WHERE user_id = ? AND friend_id = ?",
                     userId,
                     friendId
             );
@@ -72,11 +70,11 @@ public class FriendshipDbRepository implements FriendshipRepository {
         try {
             return jdbc.query(
                     "SELECT f.* " +
-                            "FROM ? AS f " +
-                            "WHERE f.id IN (SELECT fs.friend_id FROM ? AS fs WHERE fs.user_id = ?)",
+                            "FROM " + UserDbRepository.TABLE_NAME + " AS f " +
+                            "WHERE f.id IN (" +
+                            "SELECT fs.friend_id FROM " + TABLE_NAME + " AS fs WHERE fs.user_id = ?" +
+                            ")",
                     userRowMapper,
-                    UserDbRepository.TABLE_NAME,
-                    TABLE_NAME,
                     userId
             );
         } catch (RuntimeException e) {
@@ -89,14 +87,11 @@ public class FriendshipDbRepository implements FriendshipRepository {
         try {
             return jdbc.query(
                     "SELECT f.* " +
-                            "FROM ? AS f " +
-                            "WHERE f.id IN (SELECT fs1.friend_id FROM ? AS fs1 WHERE fs1.user_id = ?) " +
-                            "AND f.id IN (SELECT fs2.friend_id FROM ? AS fs2 WHERE fs2.user_id = ?)",
+                            "FROM " + UserDbRepository.TABLE_NAME + " AS f " +
+                            "WHERE f.id IN (SELECT fs1.friend_id FROM " + TABLE_NAME + " AS fs1 WHERE fs1.user_id = ?) " +
+                            "AND f.id IN (SELECT fs2.friend_id FROM " + TABLE_NAME + " AS fs2 WHERE fs2.user_id = ?)",
                     userRowMapper,
-                    UserDbRepository.TABLE_NAME,
-                    TABLE_NAME,
                     userId,
-                    TABLE_NAME,
                     friendId
             );
         } catch (RuntimeException e) {

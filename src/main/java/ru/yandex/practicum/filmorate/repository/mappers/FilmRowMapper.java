@@ -20,7 +20,7 @@ public class FilmRowMapper implements RowMapper<Film> {
                 .mpa(
                         Mpa.builder()
                                 .id(rs.getLong("mpa_id"))
-//                                .title(rs.getString("mpa_title"))
+//                                .name(rs.getString("mpa_name"))
                                 .build()
                 )
                 .build();

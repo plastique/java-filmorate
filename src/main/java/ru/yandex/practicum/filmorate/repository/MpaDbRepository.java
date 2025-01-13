@@ -23,9 +23,8 @@ public class MpaDbRepository implements MpaRepository {
     @Override
     public List<Mpa> getAll() {
         return jdbc.query(
-                "SELECT * FROM ? ORDER BY title",
-                mapper,
-                TABLE_NAME
+                "SELECT * FROM " + TABLE_NAME,
+                mapper
         );
     }
 
@@ -33,9 +32,8 @@ public class MpaDbRepository implements MpaRepository {
     public Mpa findById(final Long id) {
         try {
             return jdbc.queryForObject(
-                    "SELECT * FROM ? WHERE id = ?",
+                    "SELECT * FROM " + TABLE_NAME + " WHERE id = ?",
                     mapper,
-                    TABLE_NAME,
                     id
             );
         } catch (RuntimeException e) {

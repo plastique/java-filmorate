@@ -3,10 +3,11 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.repository.InMemoryFilmRepository;
-import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
+import ru.yandex.practicum.filmorate.repository.FilmDbRepository;
+import ru.yandex.practicum.filmorate.repository.UserDbRepository;
 import ru.yandex.practicum.filmorate.repository.contracts.UserRepository;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -25,10 +26,14 @@ public class FilmControllerTests {
 
     @BeforeEach
     public void setUp() {
-        UserRepository userRepository = new InMemoryUserRepository();
+        JdbcTemplate
+        UserRepository userRepository = new UserDbRepository();
 
         controller = new ru.yandex.practicum.filmorate.controller.FilmController(
-                new FilmService(new InMemoryFilmRepository(userRepository))
+                new FilmService(new FilmDbRepository(
+                        ,
+                        userRepository,
+                        ))
         );
 
 

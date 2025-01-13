@@ -27,9 +27,8 @@ public class GenreDbRepository implements GenreRepository {
     @Override
     public List<Genre> getAll() {
         return jdbc.query(
-                "SELECT * FROM ? ORDER BY title",
-                mapper,
-                TABLE_NAME
+                "SELECT * FROM " + TABLE_NAME,
+                mapper
         );
     }
 
@@ -37,12 +36,10 @@ public class GenreDbRepository implements GenreRepository {
     public List<Genre> findByFilmId(final Long filmId) {
         return jdbc.query(
                 "SELECT g.*" +
-                "FROM ? AS g " +
-                "INNER JOIN ? AS fg ON fg.genre_id = g.id " +
+                "FROM " + TABLE_NAME + " AS g " +
+                "INNER JOIN " + FILM_GENRE_TABLE_NAME + " AS fg ON fg.genre_id = g.id " +
                 "WHERE fg.film_id = ?",
                 mapper,
-                TABLE_NAME,
-                FILM_GENRE_TABLE_NAME,
                 filmId
         );
     }
@@ -52,11 +49,9 @@ public class GenreDbRepository implements GenreRepository {
         Map<Long, List<Genre>> genresMap = new HashMap<>();
         jdbc.queryForList(
                 "SELECT g.*, fg.film_id " +
-                    "FROM ? AS g " +
-                    "INNER JOIN ? AS fg ON fg.genre_id = g.id " +
+                    "FROM " + TABLE_NAME + " AS g " +
+                    "INNER JOIN " + FILM_GENRE_TABLE_NAME + " AS fg ON fg.genre_id = g.id " +
                     "WHERE fg.film_id IN (?)",
-                TABLE_NAME,
-                FILM_GENRE_TABLE_NAME,
                 String.join(
                         ",",
                         filmIds.stream().map(String::valueOf).toList()
@@ -64,7 +59,7 @@ public class GenreDbRepository implements GenreRepository {
         ).forEach(v -> {
             Genre genre = Genre.builder()
                     .id((Long)v.get("id"))
-                    .title((String)v.get("title"))
+                    .name((String)v.get("name"))
                     .build();
 
             Long filmId = (Long)v.get("film_id");
@@ -81,9 +76,8 @@ public class GenreDbRepository implements GenreRepository {
     public Genre findById(final Long id) {
         try {
             return jdbc.queryForObject(
-                    "SELECT * FROM ? WHERE id = ?",
+                    "SELECT * FROM " + TABLE_NAME + " WHERE id = ?",
                     mapper,
-                    TABLE_NAME,
                     id
             );
         } catch (RuntimeException e) {
