@@ -2,13 +2,11 @@ package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.InternalErrorException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.contracts.UserRepository;
 import ru.yandex.practicum.filmorate.repository.mappers.UserRowMapper;
@@ -21,11 +19,11 @@ import java.util.*;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-@Primary
 public class UserDbRepository implements UserRepository {
-    public static final String TABLE_NAME = "users";
-    private final JdbcTemplate jdbc;
 
+    public static final String TABLE_NAME = "users";
+
+    private final JdbcTemplate jdbc;
     private final UserRowMapper mapper = new UserRowMapper();
 
     @Override
@@ -44,7 +42,7 @@ public class UserDbRepository implements UserRepository {
                     id
             );
         } catch (RuntimeException e) {
-            throw new NotFoundException("User not found");
+            return null;
         }
     }
 
@@ -88,10 +86,8 @@ public class UserDbRepository implements UserRepository {
 
     @Override
     public User update(final User user) {
-        int updated = 0;
-
         try {
-            updated = jdbc.update(
+            jdbc.update(
                     "UPDATE " + TABLE_NAME + " " +
                             "SET email = ?, login = ?, name = ?, birthday = ? " +
                             "WHERE id = ?",
@@ -106,22 +102,19 @@ public class UserDbRepository implements UserRepository {
             throw new InternalErrorException("Error on updating data");
         }
 
-        if (updated < 1) {
-            throw new NotFoundException("User not found");
-        }
-
         return user;
     }
 
     @Override
-    public boolean isExists(Long id) {
+    public boolean isExists(final Long id) {
         try {
             return jdbc.queryForObject(
                     "SELECT id FROM " + TABLE_NAME + " WHERE id = ?",
-                    mapper,
+                    Long.class,
                     id
             ) != null;
         } catch (RuntimeException e) {
+            System.out.println("Error: " + e.getMessage());
             return false;
         }
     }

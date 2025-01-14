@@ -6,11 +6,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.repository.contracts.FilmRepository;
-import ru.yandex.practicum.filmorate.repository.contracts.GenreRepository;
-import ru.yandex.practicum.filmorate.repository.contracts.LikeRepository;
-import ru.yandex.practicum.filmorate.repository.contracts.MpaRepository;
+import ru.yandex.practicum.filmorate.repository.contracts.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,9 +21,20 @@ public class FilmService {
     private final LikeRepository likeRepository;
     private final MpaRepository mpaRepository;
     private final GenreRepository genreRepository;
+    private final UserRepository userRepository;
 
     public List<Film> getList() {
         return filmRepository.getAll();
+    }
+
+    public Film getFilm(final Long id) {
+        Film film = filmRepository.findById(id);
+
+        if (film == null) {
+            throw new NotFoundException("Film not found");
+        }
+
+        return film;
     }
 
     public Film create(final Film film) {
@@ -37,12 +44,18 @@ public class FilmService {
 
     public Film update(final Film film) {
         validate(film);
+
+        if (!filmRepository.isExists(film.getId())) {
+            throw new NotFoundException("Film not found");
+        }
+
         return filmRepository.update(film);
     }
 
     public void addLike(final Long id, final Long userId) {
         validateFilmId(id);
         validateUserId(userId);
+        filmAndUserExists(id, userId);
 
         likeRepository.addLike(id, userId);
     }
@@ -50,6 +63,7 @@ public class FilmService {
     public void deleteLike(final Long id, final Long userId) {
         validateFilmId(id);
         validateUserId(userId);
+        filmAndUserExists(id, userId);
 
         likeRepository.deleteLike(id, userId);
     }
@@ -60,6 +74,16 @@ public class FilmService {
         }
 
         return filmRepository.getPopular(count);
+    }
+
+    private void filmAndUserExists(final Long filmId, final Long userId) {
+        if (!filmRepository.isExists(filmId)) {
+            throw new NotFoundException("Film not found");
+        }
+
+        if (!userRepository.isExists(userId)) {
+            throw new NotFoundException("User not found");
+        }
     }
 
     private void validate(final Film film) {
@@ -86,12 +110,9 @@ public class FilmService {
         if (
             film.getMpa() != null
             && film.getMpa().getId() != null
+            && mpaRepository.findById(film.getMpa().getId()) == null
         ) {
-            try {
-                Mpa mpa = mpaRepository.findById(film.getMpa().getId());
-            } catch (NotFoundException e) {
-                throw new ValidationException("Mpa not found");
-            }
+            throw new ValidationException("Mpa not found");
         }
 
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {

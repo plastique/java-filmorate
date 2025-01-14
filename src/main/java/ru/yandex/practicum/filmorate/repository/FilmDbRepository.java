@@ -2,14 +2,12 @@ package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.InternalErrorException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -22,13 +20,17 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-@Primary
 public class FilmDbRepository implements FilmRepository {
     public static final String TABLE_NAME = "films";
     private static final String FILM_GENRE_TABLE_NAME = "film_genre";
@@ -41,7 +43,9 @@ public class FilmDbRepository implements FilmRepository {
     @Override
     public List<Film> getAll() {
         List<Film> films = jdbc.query(
-                "SELECT * FROM " + TABLE_NAME,
+                "SELECT f.*, m.name mpa_name " +
+                        "FROM " + TABLE_NAME + " AS f " +
+                        "LEFT JOIN " + MpaDbRepository.TABLE_NAME + " AS m ON m.id = f.mpa_id",
                 mapper
         );
 
@@ -56,7 +60,10 @@ public class FilmDbRepository implements FilmRepository {
     public Film findById(final Long id) {
         try {
             Film film = jdbc.queryForObject(
-                    "SELECT * FROM " + TABLE_NAME + " WHERE id = ?",
+                    "SELECT f.*, m.name mpa_name " +
+                            "FROM " + TABLE_NAME + " AS f " +
+                            "LEFT JOIN " + MpaDbRepository.TABLE_NAME + " AS m ON m.id = f.mpa_id " +
+                            "WHERE f.id = ?",
                     mapper,
                     id
             );
@@ -65,7 +72,7 @@ public class FilmDbRepository implements FilmRepository {
 
             return film;
         } catch (RuntimeException e) {
-            throw new NotFoundException("Film not found");
+            return null;
         }
     }
 
@@ -113,10 +120,9 @@ public class FilmDbRepository implements FilmRepository {
     @Override
     public Film update(final Film film) {
         Mpa mpa = getMpaByObject(film.getMpa());
-        int updated = 0;
 
         try {
-            updated = jdbc.update(
+            jdbc.update(
                     "UPDATE " + TABLE_NAME + " " +
                             "SET mpa_id = ?, name = ?, description = ?, release_date = ?, duration = ? " +
                             "WHERE id = ?",
@@ -132,10 +138,6 @@ public class FilmDbRepository implements FilmRepository {
             throw new InternalErrorException("Error on updating data");
         }
 
-        if (updated < 1) {
-            throw new NotFoundException("Film not found");
-        }
-
         deleteFilmGenres(film.getId());
         addRelations(film);
 
@@ -145,9 +147,10 @@ public class FilmDbRepository implements FilmRepository {
     @Override
     public List<Film> getPopular(int count) {
         return jdbc.query(
-                "SELECT f.*, COUNT(l.film_id) like_cnt " +
+                "SELECT f.*, m.name mpa_name, COUNT(l.film_id) like_cnt " +
                         "FROM " + TABLE_NAME + " AS f " +
                         "LEFT JOIN " + LikeDbRepository.TABLE_NAME + " as l ON (l.film_id = f.id) " +
+                        "LEFT JOIN " + MpaDbRepository.TABLE_NAME + " as m ON (m.id = f.mpa_id) " +
                         "GROUP BY f.id " +
                         "ORDER BY like_cnt DESC " +
                         "LIMIT ?",
@@ -161,7 +164,7 @@ public class FilmDbRepository implements FilmRepository {
         try {
             return jdbc.queryForObject(
                     "SELECT id FROM " + TABLE_NAME + " WHERE id = ?",
-                    mapper,
+                    Long.class,
                     id
             ) != null;
         } catch (RuntimeException e) {

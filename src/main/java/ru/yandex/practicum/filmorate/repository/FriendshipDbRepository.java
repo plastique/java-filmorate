@@ -4,10 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.InternalErrorException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.contracts.FriendshipRepository;
-import ru.yandex.practicum.filmorate.repository.contracts.UserRepository;
 import ru.yandex.practicum.filmorate.repository.mappers.UserRowMapper;
 
 import java.util.List;
@@ -19,19 +17,10 @@ public class FriendshipDbRepository implements FriendshipRepository {
     public static final String TABLE_NAME = "friendship";
 
     private final JdbcTemplate jdbc;
-    private final UserRepository userRepository;
     private final UserRowMapper userRowMapper = new UserRowMapper();
 
     @Override
     public void addFriend(final Long userId, final Long friendId) {
-        if (!userRepository.isExists(userId)) {
-            throw new NotFoundException("User not found");
-        }
-
-        if (!userRepository.isExists(friendId)) {
-            throw new NotFoundException("Friend not found");
-        }
-
         try {
             jdbc.update(
                     "INSERT INTO " + TABLE_NAME + " (user_id, friend_id, active) VALUES (?, ?, ?)",
@@ -46,14 +35,6 @@ public class FriendshipDbRepository implements FriendshipRepository {
 
     @Override
     public void deleteFriend(final Long userId, final Long friendId) {
-        if (!userRepository.isExists(userId)) {
-            throw new NotFoundException("User not found");
-        }
-
-        if (!userRepository.isExists(friendId)) {
-            throw new NotFoundException("Friend not found");
-        }
-
         try {
             jdbc.update(
                     "DELETE FROM " + TABLE_NAME + " WHERE user_id = ? AND friend_id = ?",

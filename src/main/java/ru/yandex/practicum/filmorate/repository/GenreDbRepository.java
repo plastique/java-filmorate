@@ -1,10 +1,9 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.contracts.GenreRepository;
 import ru.yandex.practicum.filmorate.repository.mappers.GenreRowMapper;
@@ -13,10 +12,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
-@Primary
 public class GenreDbRepository implements GenreRepository {
     public static final String TABLE_NAME = "genres";
     private static final String FILM_GENRE_TABLE_NAME = "film_genre";
@@ -35,7 +34,7 @@ public class GenreDbRepository implements GenreRepository {
     @Override
     public List<Genre> findByFilmId(final Long filmId) {
         return jdbc.query(
-                "SELECT g.*" +
+                "SELECT g.* " +
                 "FROM " + TABLE_NAME + " AS g " +
                 "INNER JOIN " + FILM_GENRE_TABLE_NAME + " AS fg ON fg.genre_id = g.id " +
                 "WHERE fg.film_id = ?",
@@ -47,27 +46,27 @@ public class GenreDbRepository implements GenreRepository {
     @Override
     public Map<Long, List<Genre>> findByFilmId(final List<Long> filmIds) {
         Map<Long, List<Genre>> genresMap = new HashMap<>();
-        jdbc.queryForList(
-                "SELECT g.*, fg.film_id " +
+        SqlRowSet rowSet = jdbc.queryForRowSet(
+                String.format(
+                    "SELECT g.*, fg.film_id " +
                     "FROM " + TABLE_NAME + " AS g " +
                     "INNER JOIN " + FILM_GENRE_TABLE_NAME + " AS fg ON fg.genre_id = g.id " +
-                    "WHERE fg.film_id IN (?)",
-                String.join(
-                        ",",
-                        filmIds.stream().map(String::valueOf).toList()
+                    "WHERE fg.film_id IN (%s)",
+                    filmIds.stream().map(el -> Long.toString(el)).collect(Collectors.joining(","))
                 )
-        ).forEach(v -> {
+        );
+        while (rowSet.next()) {
             Genre genre = Genre.builder()
-                    .id((Long)v.get("id"))
-                    .name((String)v.get("name"))
+                    .id(rowSet.getLong("id"))
+                    .name(rowSet.getString("name"))
                     .build();
 
-            Long filmId = (Long)v.get("film_id");
+            Long filmId = rowSet.getLong("film_id");
             List<Genre> genres = genresMap.getOrDefault(filmId, new ArrayList<>());
             genres.add(genre);
 
             genresMap.put(filmId, genres);
-        });
+        }
 
         return genresMap;
     }
@@ -81,7 +80,7 @@ public class GenreDbRepository implements GenreRepository {
                     id
             );
         } catch (RuntimeException e) {
-            throw new NotFoundException("Genre not found");
+            return null;
         }
     }
 }
