@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
@@ -79,7 +80,7 @@ public class GenreDbRepository implements GenreRepository {
                     mapper,
                     id
             );
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             return null;
         }
     }

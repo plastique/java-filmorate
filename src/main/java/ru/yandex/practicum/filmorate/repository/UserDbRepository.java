@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -14,7 +15,7 @@ import ru.yandex.practicum.filmorate.repository.mappers.UserRowMapper;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.*;
+import java.util.List;
 
 @Slf4j
 @Repository
@@ -41,7 +42,7 @@ public class UserDbRepository implements UserRepository {
                     mapper,
                     id
             );
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             return null;
         }
     }
@@ -68,7 +69,7 @@ public class UserDbRepository implements UserRepository {
                     },
                     keyHolder
             );
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             log.error(e.getMessage(), e);
             throw new InternalErrorException("Error on saving data");
         }
@@ -97,7 +98,7 @@ public class UserDbRepository implements UserRepository {
                     Date.valueOf(user.getBirthday()),
                     user.getId()
             );
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             log.error(e.getMessage(), e);
             throw new InternalErrorException("Error on updating data");
         }
@@ -113,8 +114,7 @@ public class UserDbRepository implements UserRepository {
                     Long.class,
                     id
             ) != null;
-        } catch (RuntimeException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (DataAccessException e) {
             return false;
         }
     }

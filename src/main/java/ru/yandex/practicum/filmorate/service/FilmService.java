@@ -6,7 +6,11 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.repository.contracts.*;
+import ru.yandex.practicum.filmorate.repository.contracts.FilmRepository;
+import ru.yandex.practicum.filmorate.repository.contracts.GenreRepository;
+import ru.yandex.practicum.filmorate.repository.contracts.LikeRepository;
+import ru.yandex.practicum.filmorate.repository.contracts.MpaRepository;
+import ru.yandex.practicum.filmorate.repository.contracts.UserRepository;
 
 import java.time.LocalDate;
 import java.util.List;

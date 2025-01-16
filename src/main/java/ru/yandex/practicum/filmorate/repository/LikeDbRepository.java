@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.InternalErrorException;
@@ -21,7 +22,7 @@ public class LikeDbRepository implements LikeRepository {
                     filmId,
                     userId
             );
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             throw new InternalErrorException("Error on adding like");
         }
     }
@@ -34,7 +35,7 @@ public class LikeDbRepository implements LikeRepository {
                     filmId,
                     userId
             );
-        } catch (RuntimeException ignored) {
+        } catch (DataAccessException ignored) {
         }
     }
 }

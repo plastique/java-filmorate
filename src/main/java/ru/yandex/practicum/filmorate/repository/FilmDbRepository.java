@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -71,7 +72,7 @@ public class FilmDbRepository implements FilmRepository {
             fillGenreForFilm(film);
 
             return film;
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             return null;
         }
     }
@@ -100,7 +101,7 @@ public class FilmDbRepository implements FilmRepository {
                     },
                     keyHolder
             );
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             log.error(e.getMessage(), e);
             throw new InternalErrorException("Error on saving data");
         }
@@ -133,7 +134,7 @@ public class FilmDbRepository implements FilmRepository {
                     film.getDuration(),
                     film.getId()
             );
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             log.error(e.getMessage(), e);
             throw new InternalErrorException("Error on updating data");
         }
@@ -167,7 +168,7 @@ public class FilmDbRepository implements FilmRepository {
                     Long.class,
                     id
             ) != null;
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             return false;
         }
     }
@@ -179,7 +180,7 @@ public class FilmDbRepository implements FilmRepository {
 
         try {
             return mpaRepository.findById(mpa.getId());
-        } catch (RuntimeException ignored) {
+        } catch (DataAccessException ignored) {
             return null;
         }
     }
@@ -208,7 +209,7 @@ public class FilmDbRepository implements FilmRepository {
                         }
                     }
             );
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             log.error(e.getMessage(), e);
             throw new InternalErrorException("Error on saving film genre");
         }
@@ -221,7 +222,7 @@ public class FilmDbRepository implements FilmRepository {
 
         try {
             jdbc.update("DELETE FROM " + FILM_GENRE_TABLE_NAME + " WHERE film_id = ?", filmId);
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             throw new InternalErrorException(e.getMessage());
         }
     }

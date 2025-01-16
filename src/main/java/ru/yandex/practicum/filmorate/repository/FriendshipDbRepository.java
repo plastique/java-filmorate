@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.InternalErrorException;
@@ -28,7 +29,7 @@ public class FriendshipDbRepository implements FriendshipRepository {
                     friendId,
                     false
             );
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             throw new InternalErrorException("Error on adding friend");
         }
     }
@@ -41,7 +42,7 @@ public class FriendshipDbRepository implements FriendshipRepository {
                     userId,
                     friendId
             );
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             throw new InternalErrorException("Error on deleting friend");
         }
     }
@@ -58,7 +59,7 @@ public class FriendshipDbRepository implements FriendshipRepository {
                     userRowMapper,
                     userId
             );
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             throw new InternalErrorException("Error on getting user friends");
         }
     }
@@ -75,7 +76,7 @@ public class FriendshipDbRepository implements FriendshipRepository {
                     userId,
                     friendId
             );
-        } catch (RuntimeException e) {
+        } catch (DataAccessException e) {
             throw new InternalErrorException("Error on getting user friends");
         }
     }
