@@ -1,14 +1,10 @@
 package ru.yandex.practicum.filmorate;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.repository.InMemoryFilmRepository;
-import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
-import ru.yandex.practicum.filmorate.repository.contracts.UserRepository;
-import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
 import java.util.Random;
@@ -20,19 +16,8 @@ public class FilmControllerTests {
     private static final int DESCRIPTION_LIMIT = 200;
     private static final LocalDate RELEASE_MIN_DATE = LocalDate.of(1895, 12, 28);
 
+    @Autowired
     private ru.yandex.practicum.filmorate.controller.FilmController controller;
-    private ru.yandex.practicum.filmorate.controller.UserController userController;
-
-    @BeforeEach
-    public void setUp() {
-        UserRepository userRepository = new InMemoryUserRepository();
-
-        controller = new ru.yandex.practicum.filmorate.controller.FilmController(
-                new FilmService(new InMemoryFilmRepository(userRepository))
-        );
-
-
-    }
 
     private static Film makeFilm() {
         return Film.builder()
@@ -60,23 +45,25 @@ public class FilmControllerTests {
 
     @Test
     public void filmAddedWithValidFieldValues() {
-        final Film[] films = {null};
+        int filmsCountBefore = controller.list().size();
 
-        assertDoesNotThrow(() -> films[0] = controller.create(makeFilm()), "Film not created");
-        assertTrue(controller.list().contains(films[0]), "Film not added");
+        assertDoesNotThrow(() -> controller.create(makeFilm()), "Film not created");
+        assertNotEquals(filmsCountBefore, controller.list(), "Film not added");
     }
 
     @Test
     public void filmUpdatedWithValidFieldValues() {
         Film film = controller.create(makeFilm());
+        final Film[] films = {null};
 
         film.setName("Film 2");
         film.setDescription("Film description 2");
         film.setDuration(200);
         film.setReleaseDate(LocalDate.of(2021, 11, 28));
 
-        assertDoesNotThrow(() -> controller.update(film), "Film not updated");
-        assertTrue(controller.list().contains(film), "Film not found");
+        assertDoesNotThrow(() -> films[0] = controller.update(film), "Film not updated");
+
+        assertEquals(films[0], controller.getFilm(film.getId()), "Film not found");
     }
 
     @Test
